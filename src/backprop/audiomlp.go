@@ -1104,11 +1104,12 @@ func (mlp *MLP) calculatePSD(audio []float64, PSD []float64, plottype string) (f
 
 	// Find the mean by averaging the PSD sum
 	psdSum := 0.0
+	var sections int
 
 	// Bartlett's method has no overlap of input data and uses the rectangle window
 	// If FFT size is 8192, only use rectangle window
 	if mlp.fftWindow == "Rectangle" || mlp.fftSize == 8192 {
-		sections := SAMPLES / N
+		sections = SAMPLES / N
 		start := 0
 		// Loop over sections and accumulate the PSD
 		for i := 0; i < sections; i++ {
@@ -1135,47 +1136,17 @@ func (mlp *MLP) calculatePSD(audio []float64, PSD []float64, plottype string) (f
 
 			// part of K*Sum(w[i]*w[i]) PSD normalizer
 			normalizerPSD += sumWindow
+			// No overlap, skip to next N samples
+			start += N
 		}
 
-		// Normalize the PSD using K*Sum(w[i]*w[i])
-		// Use log plot for wide dynamic range
-		if plottype == "linear" {
-			// preprocess data for MLP by removing the mean
-			psdMean := psdSum / float64(m*sections)
-			for i := range PSD {
-				PSD[i] = (PSD[i] - psdMean) / normalizerPSD
-				if PSD[i] > psdMax {
-					psdMax = PSD[i]
-				}
-				if PSD[i] < psdMin {
-					psdMin = PSD[i]
-				}
-			}
-			// 10log10 in dB
-		} else if plottype == "log" {
-			for i := range PSD {
-				PSD[i] /= normalizerPSD
-				PSD[i] = 10.0 * math.Log10(PSD[i])
-				if PSD[i] > psdMax {
-					psdMax = PSD[i]
-				}
-				if PSD[i] < psdMin {
-					psdMin = PSD[i]
-				}
-			}
-		} else {
-			return 0, 0, fmt.Errorf("calculatePSD invalid plot type: %s", plottype)
-		}
-
-		// No overlap, skip to next N samples
-		start += N
 		// 50% overlap sections of audio input for non-rectangle windows, Welch's method
 	} else {
 		// use two buffers, copy previous section to the front of current
 		for j := 0; j < m; j++ {
 			bufm[j] = complex(audio[j], 0)
 		}
-		sections := (SAMPLES-N)/m + 1
+		sections = (SAMPLES-N)/m + 1
 		start := 0
 		for i := 0; i < sections; i++ {
 			start += m
@@ -1209,36 +1180,36 @@ func (mlp *MLP) calculatePSD(audio []float64, PSD []float64, plottype string) (f
 			// part of K*Sum(w[i]*w[i]) PSD normalizer
 			normalizerPSD += sumWindow
 		}
+	}
 
-		// Normalize the PSD using K*Sum(w[i]*w[i])
-		// Use log plot for wide dynamic range
-		if plottype == "linear" {
-			// preprocess data for MLP by removing the mean
-			psdMean := psdSum / float64(m*sections)
-			for i := range PSD {
-				PSD[i] = (PSD[i] - psdMean) / normalizerPSD
-				if PSD[i] > psdMax {
-					psdMax = PSD[i]
-				}
-				if PSD[i] < psdMin {
-					psdMin = PSD[i]
-				}
+	// Normalize the PSD using K*Sum(w[i]*w[i])
+	// Use log plot for wide dynamic range
+	if plottype == "linear" {
+		// preprocess data for MLP by removing the mean
+		psdMean := psdSum / float64(m*sections)
+		for i := range PSD {
+			PSD[i] = (PSD[i] - psdMean) / normalizerPSD
+			if PSD[i] > psdMax {
+				psdMax = PSD[i]
 			}
-			// 10log10 in dB
-		} else if plottype == "log" {
-			for i := range PSD {
-				PSD[i] /= normalizerPSD
-				PSD[i] = 10.0 * math.Log10(PSD[i])
-				if PSD[i] > psdMax {
-					psdMax = PSD[i]
-				}
-				if PSD[i] < psdMin {
-					psdMin = PSD[i]
-				}
+			if PSD[i] < psdMin {
+				psdMin = PSD[i]
 			}
-		} else {
-			return 0, 0, fmt.Errorf("calculatePSD invalid plot type: %s", plottype)
 		}
+		// 10log10 in dB
+	} else if plottype == "log" {
+		for i := range PSD {
+			PSD[i] /= normalizerPSD
+			PSD[i] = 10.0 * math.Log10(PSD[i])
+			if PSD[i] > psdMax {
+				psdMax = PSD[i]
+			}
+			if PSD[i] < psdMin {
+				psdMin = PSD[i]
+			}
+		}
+	} else {
+		return 0, 0, fmt.Errorf("calculatePSD invalid plot type: %s", plottype)
 	}
 
 	return psdMin, psdMax, nil
