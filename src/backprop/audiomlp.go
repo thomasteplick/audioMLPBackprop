@@ -460,9 +460,7 @@ func (mlp *MLP) createExamples() error {
 			mlp.samples[class].name = strings.Split(name, ".")[0]
 			// The desired output of the MLP is class
 			mlp.samples[class].desired = class
-			for k, p := range PSD {
-				mlp.samples[class].psd[k] = p
-			}
+			copy(mlp.samples[class].psd, PSD)
 			class++
 		}
 	}
@@ -1177,7 +1175,7 @@ func (mlp *MLP) calculatePSD(audio []float64, PSD []float64, plottype string) (f
 		for j := 0; j < m; j++ {
 			bufm[j] = complex(audio[j], 0)
 		}
-		sections := (SAMPLES - N) / m
+		sections := (SAMPLES-N)/m + 1
 		start := 0
 		for i := 0; i < sections; i++ {
 			start += m
@@ -1191,8 +1189,8 @@ func (mlp *MLP) calculatePSD(audio []float64, PSD []float64, plottype string) (f
 			copy(bufN[m:], bufm)
 
 			// window the N samples with chosen window
-			for i := 0; i < N; i++ {
-				bufN[i] *= w(i, m)
+			for k := 0; k < N; k++ {
+				bufN[k] *= w(k, m)
 			}
 
 			// Perform N-point complex FFT and add squares to previous values in PSD
@@ -1396,8 +1394,8 @@ func (mlp *MLP) processFrequencyDomain(filename string) error {
 func handleAudioGeneration(w http.ResponseWriter, r *http.Request) {
 
 	const (
-		minSines = 5 // minimum number of sinsuoids
-		maxSines = 8 // maximum number of sinsuoids
+		minSines = 8  // minimum number of sinsuoids
+		maxSines = 12 // maximum number of sinsuoids
 	)
 
 	var (
@@ -1453,10 +1451,10 @@ func handleAudioGeneration(w http.ResponseWriter, r *http.Request) {
 			maxampl := 500.0
 			noiseSD := math.Sqrt(0.5 * maxampl * maxampl / ratio)
 
-			// define sine wave frequencies for k*120 Hz, k=1,2,...,16, gives 120 to 1920
+			// define sine wave frequencies for k*60 Hz, k=1,2,...,32, gives 60 to 1920
 			// 2000 Hz is the Nyquist frequency since 4000 Hz is the sampling rate
-			freq := make([]float64, classes)
-			const delFreq = 120.0
+			freq := make([]float64, 2*classes)
+			const delFreq = 60.0
 			for i := range freq {
 				freq[i] = float64(i+1) * delFreq
 			}
@@ -1476,7 +1474,7 @@ func handleAudioGeneration(w http.ResponseWriter, r *http.Request) {
 				for i := range fflt64 {
 					for {
 						dupl := false
-						trial = rand.Intn(classes)
+						trial = rand.Intn(2 * classes)
 						for j := range fflt64 {
 							if fflt64[j] == freq[trial] {
 								dupl = true
