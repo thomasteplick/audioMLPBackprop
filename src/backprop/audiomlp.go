@@ -208,7 +208,7 @@ func (mlp *MLP) calculateMSE(epoch int) {
 }
 
 // determineClass determines testing example class given sample number and sample
-func (mlp *MLP) determineClass(j int, sample Sample) error {
+func (mlp *MLP) determineClass(sample Sample) error {
 	// At output layer, classify example, increment class count, %correct
 
 	// convert node outputs to the class; zero is the threshold
@@ -241,7 +241,7 @@ func (mlp *MLP) class2desired(class int) {
 	}
 }
 
-func (mlp *MLP) propagateForward(samp Sample, epoch int) error {
+func (mlp *MLP) propagateForward(samp Sample) error {
 	// Assign sample to input layer, i=0 is the bias equal to one
 	for i := 1; i < len(mlp.node[0]); i++ {
 		mlp.node[0][i].y = float64(samp.psd[i-1])
@@ -377,7 +377,7 @@ func (mlp *MLP) runEpochs() error {
 		// Loop over the training examples
 		for _, samp := range mlp.samples {
 			// Forward Propagation
-			err := mlp.propagateForward(samp, n)
+			err := mlp.propagateForward(samp)
 			if err != nil {
 				return fmt.Errorf("forward propagation error: %s", err.Error())
 			}
@@ -805,15 +805,15 @@ func (mlp *MLP) runClassification() error {
 	mlp.plot.Grid = make([]string, rows*cols)
 	mlp.statistics =
 		Stats{correct: make([]int, classes), classCount: make([]int, classes)}
-	for i, samp := range mlp.samples {
+	for _, samp := range mlp.samples {
 		// Forward Propagation
-		err := mlp.propagateForward(samp, 1)
+		err := mlp.propagateForward(samp)
 		if err != nil {
 			return fmt.Errorf("forward propagation error: %s", err.Error())
 		}
 		// At output layer, classify example, increment class count, %correct
 		// Convert node output y to class
-		err = mlp.determineClass(i, samp)
+		err = mlp.determineClass(samp)
 		if err != nil {
 			return fmt.Errorf("determineClass error: %s", err.Error())
 		}
@@ -851,7 +851,7 @@ func (mlp *MLP) runClassification() error {
 }
 
 // newTestingMLP constructs an MLP from the saved mlp weights and parameters
-func newTestingMLP(r *http.Request, plot *PlotT) (*MLP, error) {
+func newTestingMLP(plot *PlotT) (*MLP, error) {
 	// Read in weights from csv file, ordered by layers, and MLP parameters
 	f, err := os.Open(path.Join(dataDir, fileweights))
 	if err != nil {
@@ -997,7 +997,7 @@ func handleTestingMLP(w http.ResponseWriter, r *http.Request) {
 		err  error
 	)
 	// Construct MLP instance containing MLP state
-	mlp, err = newTestingMLP(r, &plot)
+	mlp, err = newTestingMLP(&plot)
 	if err != nil {
 		fmt.Printf("newTestingMLP() error: %v\n", err)
 		plot.Status = fmt.Sprintf("newTestingMLP() error: %v", err.Error())
