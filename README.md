@@ -55,10 +55,10 @@ phase and the MLP Training Parameters must be entered again.
 <b>Generate Audio Wav Files, 0dB SNR, FFT Size 1024, FFT Window Hamming
 ![image](https://github.com/user-attachments/assets/9f9a4230-28f5-4955-9b32-0de5172cb365)
 
-<b>Audio Recognition Learning Curve, MSE vs Epoch, One Hidden Layer, 20 nodes/neurons deep, FFT Size 8192, FFT Window Rectangle</b>
+<b>Audio Recognition Learning Curve, MSE vs Epoch, One Hidden Layer, 20 nodes/neurons deep, FFT Size 8192, FFT Window Rectangle,</b>
 <b>0dB SNR, Learning Rate .01, Epochs 100</b>
 ![image](https://github.com/user-attachments/assets/a56c1ca4-2374-46c2-855f-a282d50185a6)
 
-<b>Audio Recognition Test Results, One Hidden Layer, 20 nodes/neurons deep, FFT Size 8192, FFT Window Rectangle</b>
+<b>Audio Recognition Test Results, One Hidden Layer, 20 nodes/neurons deep, FFT Size 8192, FFT Window Rectangle,</b>
 <b>0dB SNR, Learning Rate .01, Epochs 100</b>
 ![image](https://github.com/user-attachments/assets/5014f9a9-0768-4d3a-9c9e-afa0ee74322a)
