@@ -39,7 +39,7 @@ but it eventually settles down after about 100 epochs. An epoch is the forward a
 </p>
 <p>
 When the <i>Test</i> link is clicked, 16 examples are supplied to the MLP  It classifies the audio wav files.
-The test results are tabulated and the actual PSD images are graphed from the wav files that were supplied to the MLP
+The test results are tabulated and the frequency domain (Spectral Power Density) can be viewed for the chosen file.
 It takes some trial-and-error with the MLP Training Parameters to reduce the MSE to zero.  It is possible to a specify a 
 more complex MLP than necessary and not get good results.  For example, using more hidden layers, a greater layer depth,
 or over training with more examples than necessary may be detrimental to the MLP.  Clicking the <i>Train</i> link starts a new training
