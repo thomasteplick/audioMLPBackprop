@@ -38,8 +38,9 @@ and the Learning Curve (mean-square error (MSE) vs epoch) is graphed.  As can be
 but it eventually settles down after about 100 epochs. An epoch is the forward and backward propagation of all the 16 training samples.
 </p>
 <p>
-When the <i>Test</i> link is clicked, 16 examples are supplied to the MLP  It classifies the audio wav files.
+When the <i>Test</i> link is clicked, 16 examples are supplied to the MLP.  It classifies the audio wav files.
 The test results are tabulated and the frequency domain (Spectral Power Density) can be viewed for the chosen file.
+If fmedia is in the PATH environment variable, the selected wav file is played on the user's audio device.
 It takes some trial-and-error with the MLP Training Parameters to reduce the MSE to zero.  It is possible to a specify a 
 more complex MLP than necessary and not get good results.  For example, using more hidden layers, a greater layer depth,
 or over training with more examples than necessary may be detrimental to the MLP.  Clicking the <i>Train</i> link starts a new training
